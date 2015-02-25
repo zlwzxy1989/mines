@@ -1,0 +1,36 @@
+.sl_main{
+	line-height:20px;
+}
+
+.sl_left{
+	max-width:20%;
+	border:#CCCCCC solid 1px;
+	float:left;
+	margin:10px;
+	padding:10px;
+}
+
+.sl_left_title{
+	color:blue;
+}
+
+.sl_left_action{
+	margin:10px 0;
+}
+
+.sl_right{
+	float:left;
+	max-width:70%;
+	border:#CCCCCC solid 1px;
+	margin:10px;
+	padding:10px;
+}
+
+.sl_right_mine {
+	max-width:90%;
+	border:#000 solid 1px;
+}
+
+.debug {
+	display:none;
+}
