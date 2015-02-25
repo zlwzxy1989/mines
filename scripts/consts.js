@@ -18,7 +18,9 @@ var grid_default_config = {
 	"status":0,
 	//周围的雷数
 	"mines_arund":0,
-	"mousedown_img": 'grid_mouse_down.gif';
+	"width":10,
+	"container":'div',
+	"mousedown_img": 'grid_mouse_down.gif'
 };
 
 var GRID_TYPE_EMPTY = 0;

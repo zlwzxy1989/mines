@@ -1,3 +1,8 @@
+.div {
+	margin:0;
+	padding:0;
+}
+
 .sl_main{
 	line-height:20px;
 }
@@ -20,17 +25,60 @@
 
 .sl_right{
 	float:left;
-	max-width:70%;
 	border:#CCCCCC solid 1px;
 	margin:10px;
 	padding:10px;
 }
 
 .sl_right_mine {
-	max-width:90%;
 	border:#000 solid 1px;
 }
-
+#mine_area div {
+	float:left;
+	border:#000 solid 1px;
+}
 .debug {
 	display:none;
+}
+
+.sl_grid_0 {
+	background:url(../img/sl_grid_0.png) no-repeat
+}
+
+.sl_gird_1-0-0 {
+	background:url(../img/sl_gird_1-0-0.png) no-repeat
+}
+
+.sl_gird_1-0-1 {
+	background:url(../img/sl_gird_1-0-1.png) no-repeat
+}
+.sl_gird_1-0-2 {
+	background:url(../img/sl_gird_1-0-2.png) no-repeat
+}
+.sl_gird_1-0-3 {
+	background:url(../img/sl_gird_1-0-3.png) no-repeat
+}
+.sl_gird_1-0-4 {
+	background:url(../img/sl_gird_1-0-4.png) no-repeat
+}
+.sl_gird_1-0-5 {
+	background:url(../img/sl_gird_1-0-5.png) no-repeat
+}
+.sl_gird_1-0-6 {
+	background:url(../img/sl_gird_1-0-6.png) no-repeat
+}
+.sl_gird_1-0-7 {
+	background:url(../img/sl_gird_1-0-7.png) no-repeat
+}
+.sl_gird_1-0-8 {
+	background:url(../img/sl_gird_1-0-8.png) no-repeat
+}
+.sl_gird_1-1 {
+	background:url(../img/sl_gird_1-1.png) no-repeat
+}
+.sl_gird_2 {
+	background:url(../img/sl_gird_2.png) no-repeat
+}
+.sl_gird_3 {
+	background:url(../img/sl_gird_3.png) no-repeat
 }

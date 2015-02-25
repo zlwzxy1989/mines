@@ -6,6 +6,7 @@
 <style link="css/style.css"></style>
 <link rel="stylesheet" type="text/css" href="css/style.css">
 <script src="scripts/jquery_1.10.2.js"></script>
+<script src="scripts/consts.js"></script>
 <script src="scripts/tools.js"></script>
 <script src="scripts/sl_flag_controller.js"></script>
 <script src="scripts/sl_map_generator.js"></script>
@@ -18,20 +19,19 @@
 			设置:
 		</div>
 		<div class="sl_left_config">
-			雷数(个):<br /><input type="text" name="mine_num" name="mine_num" value="20" /><br />
+			雷数(个):<br /><input type="text" id="mine_num" name="mine_num" value="20" /><br />
 			地图高(格子数):<br /><input type="text" id="map_height" name="map_height" value="20" /><br />
-			地图宽(格子数):<br /><input type="text" name="map_width" name="map_width" value="20" /><br />
-			每个格子的边长(px):<br /><input type="text" name="grid_width" name="grid_width" value="10" /><br />
+			地图宽(格子数):<br /><input type="text" id="map_width" name="map_width" value="20" /><br />
+			每个格子的边长(px):<br /><input type="text" id="grid_width" name="grid_width" value="10" /><br />
 		</div>
 		<div class="sl_left_action">
 			<input type="button" id="init" value="开始新游戏">
-			<input type="button" id="init" value="重置设置"><br />
+			<input type="button" id="reset" value="重置设置"><br />
 		</div>
 	</div>
 	
 	<div class="sl_right">
 		<div class="sl_right_mine" id="mine_area">
-			aa
 		</div>
 	</div>
 	<div class="sl_bottom debug">
