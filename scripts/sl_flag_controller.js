@@ -23,24 +23,35 @@ function flagController(){
 	//算法可以改进,当雷比空白多时可以先填空白,剩下的就是雷
 	_result.randomize = function(){
 		addMsgTo('randomize...');
+		var _time_start = new Date().getTime();
 		_result.mine_pool = {};
 		_result.mine_pool_arr = [];
-		var i = 0,_x,_y,_point;
-		while (i < _result.config.mine_num)
+		//所有格子的池,在某个格子做为雷取出后从池中去除
+		var _pool_pop = [];
+		var i, j;
+		for (i = 0;i < _result.config.map_width;i++)
 		{
-			_x = getRandInt(0, _result.config.map_width);
-			_y = getRandInt(0, _result.config.map_height);
-			_point = String(_x) + '-' + String(_y);
-			//未重复的雷,加入雷列表
-			if (_result.mine_pool[_point] == undefined)
+			for (j = 0;j < _result.config.map_height;j++)
 			{
-				addMsgTo(' add mine ' + _point);
-				_result.mine_pool[_point] = {"x":_x, "y":_y};
-				_result.mine_pool_arr.push(_result.mine_pool[_point]);
-				i++;
+				_pool_pop.push({"x":i, "y":j});
 			}
 		}
+		var k = 0;
+		var _index, _point;
+		while (k < _result.config.mine_num)
+		{
+			_index = getRandInt(0, _pool_pop.length - 1);
+			_point = getPointStr(_pool_pop[_index].x, _pool_pop[_index].y);
+			addMsgTo(' add mine ' + _point);
+			_result.mine_pool[_point] =  _pool_pop[_index];
+			_result.mine_pool_arr.push(_result.mine_pool[_point]);
+			_pool_pop.splice(_index, 1);
+			k++;
+		}
+		var _time_end = new Date().getTime();
+		addMsgTo('time spent:' + (_time_end - _time_start)/1000 + ' s');
 		addMsgTo('randomize end...');
+		
 	}
 
 	_result.genGridInfo = function(status){
@@ -182,7 +193,7 @@ function grid(){
 						{
 							for (j = _result.config.y - 1; j <= _result.config.y + 1; j++)
 							{
-								if ((i != _result.config.x || j != _result.config.y) && isClickable(i, j))
+								if (isClickable(i, j) && (i != _result.config.x || j != _result.config.y))
 								{
 									$("#" + _result.config.prefix + getPointStr(i, j)).click();
 								}

@@ -28,41 +28,6 @@ function mapGenerator(){
 				$(_result.config.container).append(_result.mapData[i][j].getHtml());
 			}
 		}
-		/*
-		//添加用于统计的事件
-		$(_result.config.container + " img").each(function(){
-			var _id = $(this).attr('id');
-			var _arr_tmp = _id.split('_');
-			_arr_tmp = _arr_tmp[_arr_tmp.length - 1].split('-');
-			var _x = _arr_tmp[0];
-			var _y = _arr_tmp[1];
-			var _grid_tmp = _result.mapData[_x][_y];
-			$(this).click(function(){
-				addMsgTo('clicked');
-				if (_grid_tmp.getClickable() && !sl_game_over)
-				{
-					setClicked(_result.config.x, _result.config.y);
-					if (_grid_tmp.isMine())
-					{
-						sl_game_over = true;
-						_result.draw(GRID_STATUS_OPENED);
-						setTimeout("alert('你SHI了!'), 100");
-						return;
-					}
-					sl_num_clicked++;
-					addMsgTo('clicked grid num:' + sl_num_clicked);
-					//判定是否胜利
-					if (sl_num_clicked + _result.config.mine_num >= sl_grid_num_all)
-					{
-						sl_game_over = true;
-						_result.draw(GRID_STATUS_OPENED);
-						setTimeout("alert('你赢了!'), 100");
-						return;
-					}
-				}				
-			});
-			
-		});*/
 	}
 	return _result;
 }
