@@ -21,7 +21,8 @@ function flagController(){
 	}
 	//随机生成雷的坐标
 	//算法可以改进,当雷比空白多时可以先填空白,剩下的就是雷
-	function randomize(){
+	_result.randomize = function(){
+		addMsgTo('randomize...');
 		_result.mine_pool = {};
 		_result.mine_pool_arr = [];
 		var i = 0,_x,_y,_point;
@@ -33,26 +34,48 @@ function flagController(){
 			//未重复的雷,加入雷列表
 			if (_result.mine_pool[_point] == undefined)
 			{
+				addMsgTo(' add mine ' + _point);
 				_result.mine_pool[_point] = {"x":_x, "y":_y};
 				_result.mine_pool_arr.push(_result.mine_pool[_point]);
 				i++;
 			}
 		}
+		addMsgTo('randomize end...');
 	}
 
 	_result.genGridInfo = function(status){
-		randomize();
+		addMsgTo('genGridInfo...');
 		var _grid_info = [];
 		var _line = [];
 		var i,j,_grid_tmp,_point,_type;
+		//用于计算周围的雷数
+		var m,n,_x_min,_x_max,_y_min,_y_max,_point_tmp,_mine_around_tmp;
 		var _status = status == undefined ? GRID_STATUS_COVERD : status;
 		for (i = 0;i < _result.config.map_width;i++)
 		{
 			_line = [];
 			for (j = 0;j < _result.config.map_height;j++)
 			{
-				_point = String(i) + '-' + String(j);
+				_point = getPointStr(i, j);
 				_type = _result.mine_pool[_point] == undefined ? GRID_TYPE_EMPTY : GRID_TYPE_MINE;
+				//计算格子周围的雷数
+				_x_min = i - 1 < 0 ? 0 : i - 1;
+				_x_max = i + 1 >= _result.config.map_width ? i : i + 1;
+				_y_min = j - 1 < 0 ? 0 : j - 1;
+				_y_max = j + 1 >= _result.config.map_height ? j : j + 1;
+				_mines_around_tmp = 0;
+				for (m = _x_min;m <= _x_max ;m++ )
+				{
+					for (n = _y_min;n <= _y_max ;n++ )
+					{
+						_point_tmp = getPointStr(m, n);
+						if (_result.mine_pool[_point_tmp] != undefined)
+						{
+							_mines_around_tmp++;
+						}
+					}
+				}
+				addMsgTo(' point '+ _point +': '+ _mines_around_tmp +' mines around');
 				_grid_tmp = new grid();
 				_grid_tmp.init({
 					"x":i,
@@ -61,12 +84,17 @@ function flagController(){
 					"status":_status,
 					"width": _result.config.grid_width,
 					"container":_result.config.grid_container,
-					"prefix":_result.config.grid_class_prefix
+					"prefix":_result.config.grid_class_prefix,
+					"mine_num":_result.config.mine_num,
+					"mines_around":_mines_around_tmp,
+					"x_max":_result.config.map_width,
+					"y_max":_result.config.map_height
 				});
 				_line.push(_grid_tmp);
 			}
 			_grid_info.push(_line);
 		}
+		addMsgTo('genGridInfo end...');
 		return _grid_info;
 	}
 	return _result;
@@ -77,16 +105,16 @@ function grid(){
 	_result.config = {};
 
 	_result.init = function(args){
-		_result.config = args;
+		_result.config = getValuesFromObj(args, grid_default_config);
 	}
-	_result.setValue = function(key, value){
+	_result.setConfigValue = function(key, value){
 		_result.config[key] = value;
 	}
-	_result.getValue = function(key, default_value){
+	_result.getConfigValue = function(key, default_value){
 		return _result.config[key] == undefined ? default_value : _result.config[key];
 	}
-	_result.getContainerId = function(){
-		return _result.config.prefix + _result.config.x + '-' + _result.config.y;
+	_result.getImgId = function(){
+		return _result.config.prefix + getPointStr(_result.config.x, _result.config.y);
 	}
 
 	_result.isMine = function(){
@@ -95,7 +123,7 @@ function grid(){
 	_result.getClickable = function(){
 		return _result.config.status == GRID_STATUS_COVERD;
 	}
-	_result.getCurrentImageClass = function(){
+	_result.getCurrentImageSrc = function(){
 		var _img_id = '';
 		if (_result.config.status == GRID_STATUS_OPENED)
 		{
@@ -105,19 +133,71 @@ function grid(){
 				_img_id = String(_result.config.status) + '-' + String(_result.config.type);
 			} else if (_result.config.type == GRID_TYPE_EMPTY)
 			{
-				_img_id = String(_result.config.status) + '-' + String(_result.config.type) + '-' + String(_result.config.mines_arund);
+				_img_id = String(_result.config.status) + '-' + String(_result.config.type) + '-' + String(_result.config.mines_around);
 			}			
 		} else {
 			_img_id = String(_result.config.status);
 		}
-		return _result.config.prefix + 'grid_' + _img_id;
+		return 'img/' + _result.config.prefix + 'grid_' + _img_id + '.' + _result.config.img_type;
 	}
 	_result.getHtml = function(){
-		var _html = '';
-		_html += "<" + _result.config.container + " class='" + _result.getCurrentImageClass() + "' style='width:" + _result.config.width + "px;height:" + _result.config.width + "px' id='" + _result.getContainerId() + "'>";
-		_html += "</" + _result.config.container + ">";
-		return _html;
+		var _container = $("<" + _result.config.container + " style='width:" + _result.config.width + "px;height:" + _result.config.width + "px'></" + _result.config.container + ">");
+		var _img = $("<img id='" + _result.getImgId() + "' src='" + _result.getCurrentImageSrc() + "' />");
+		var _click_event = function(){
+			addMsgTo('click ' + _result.getImgId() + '...');
+			//未打开状态时,打开格子
+			if (isClickable(_result.config.x, _result.config.y))
+			{
+				setClicked(_result.config.x, _result.config.y);
+				$(this).unbind('.front');
+
+				_result.setConfigValue('status', GRID_STATUS_OPENED);
+				$(this).attr('src', _result.getCurrentImageSrc());
+				//是否踩雷
+				if (_result.isMine())
+				{
+					sl_game_over = true;
+					//_result.draw(GRID_STATUS_OPENED);
+					setTimeout("alert('你SHI了!')", 100);
+					return;
+
+				} else {
+					sl_num_clicked++;
+					addMsgTo('clicked grid num:' + sl_num_clicked + ' | ' + sl_grid_num_all);
+					//判定是否胜利
+					if (sl_num_clicked + _result.config.mine_num >= sl_grid_num_all)
+					{
+						sl_game_over = true;
+						//_result.draw(GRID_STATUS_OPENED);
+						setTimeout("alert('你赢了!')", 100);
+						return;
+					}
+
+					//是空格,则需要打开相邻的空格和数字
+					if (_result.config.mines_around == 0)
+					{
+						addMsgTo('click grids around');
+						var i,j;
+						for (i = _result.config.x - 1; i <= _result.config.x + 1; i++)
+						{
+							for (j = _result.config.y - 1; j <= _result.config.y + 1; j++)
+							{
+								if ((i != _result.config.x || j != _result.config.y) && isClickable(i, j))
+								{
+									$("#" + _result.config.prefix + getPointStr(i, j)).click();
+								}
+							}
+						}
+					}
+				}
+				
+			}
+		}
+		_img.bind('click.front', _click_event);
+		_container.append(_img);
+		return _container;
 
 	}
+	
 	return _result;
 }

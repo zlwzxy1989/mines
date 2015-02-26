@@ -1,8 +1,8 @@
 var map_generator_default_config = {
 	"mine_num":20,
-	"map_height":20,
-	"map_width":20,
-	"grid_width":10,
+	"map_height":10,
+	"map_width":10,
+	"grid_width":12,
 	"container":'#mine_area',
 	"grid_container":'div',
 	"grid_class_prefix":'sl_',
@@ -17,9 +17,12 @@ var grid_default_config = {
 	//0-覆盖 1-打开 2-棋 3-问号
 	"status":0,
 	//周围的雷数
-	"mines_arund":0,
+	"mines_around":0,
+	"mine_num":20,
 	"width":10,
 	"container":'div',
+	"prefix":'sl_',
+	"img_type":'gif',
 	"mousedown_img": 'grid_mouse_down.gif'
 };
 

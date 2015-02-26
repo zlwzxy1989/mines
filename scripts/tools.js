@@ -5,6 +5,26 @@
  */
 
 /*
+ * 复制对象
+ *
+ * @param obj object
+ *
+ * return object
+ * */
+function clone(obj){ 
+	if(typeof(obj) != 'object') {
+		return obj;
+	}
+	if(obj == null) {
+		return obj; 
+	}
+	var _new_obj = new Object(); 
+	for(var i in obj) {
+		_new_obj[i] = clone(obj[i]); 
+	}
+	return _new_obj; 
+} 
+/*
  * 从obj中获取key对应的value,如key对应的值不存在则返回default_value
  *
  * @param obj object
@@ -28,7 +48,7 @@ function getValueFromObj(obj, key, default_value) {
  * */
 
 function getValuesFromObj(obj, default_obj) {
-    var _obj = obj || {}, _default_obj = default_obj || {};
+    var _obj = obj || {}, _default_obj = clone(default_obj) || {};
     for (var key in _default_obj) {
         _default_obj[key] = getValueFromObj(_obj, key, _default_obj[key]);
     }
