@@ -56,6 +56,7 @@ function flagController(){
 
 	_result.genGridInfo = function(status){
 		addMsgTo('genGridInfo...');
+		var _time_start = new Date().getTime();
 		var _grid_info = [];
 		var _line = [];
 		var i,j,_grid_tmp,_point,_type;
@@ -105,6 +106,8 @@ function flagController(){
 			}
 			_grid_info.push(_line);
 		}
+		var _time_end = new Date().getTime();
+		addMsgTo('time spent:' + (_time_end - _time_start)/1000 + ' s');
 		addMsgTo('genGridInfo end...');
 		return _grid_info;
 	}

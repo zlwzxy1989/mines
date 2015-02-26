@@ -12,6 +12,8 @@ function mapGenerator(){
 	
 	//0-重画,格子覆盖表示 1-格子正面表示
 	_result.draw = function(draw_type){
+		addMsgTo('draw...');
+		var _time_start = new Date().getTime();
 		var _draw_type = draw_type == undefined ? GRID_STATUS_COVERD : draw_type;
 		var _container_width,_container_height;
 		var i,j;
@@ -28,6 +30,9 @@ function mapGenerator(){
 				$(_result.config.container).append(_result.mapData[i][j].getHtml());
 			}
 		}
+		var _time_end = new Date().getTime();
+		addMsgTo('time spent:' + (_time_end - _time_start)/1000 + ' s');
+		addMsgTo('draw end...');
 	}
 	return _result;
 }
