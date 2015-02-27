@@ -63,6 +63,7 @@ function flagController(){
 		//用于计算周围的雷数
 		var m,n,_x_min,_x_max,_y_min,_y_max,_point_tmp,_mine_around_tmp;
 		var _status = status == undefined ? GRID_STATUS_COVERD : status;
+		//数组中保存形式为data[y坐标][x坐标]
 		for (j = 0;j < _result.config.map_height;j++)
 		{
 			_line = [];
@@ -172,8 +173,8 @@ function grid(){
 			if (_result.isMine())
 			{
 				sl_game_over = true;
-				draw(GRID_STATUS_OPENED, _result.config.x, _result.config.y);
 				setTimeout("alert('你SHI了!')", 100);
+				draw(GRID_STATUS_OPENED, _result.config.x, _result.config.y);
 				return;
 
 			} else {
@@ -183,8 +184,8 @@ function grid(){
 				if (sl_num_clicked + _result.config.mine_num >= sl_grid_num_all)
 				{
 					sl_game_over = true;
-					draw(GRID_STATUS_OPENED);
 					setTimeout("alert('你赢了!')", 100);
+					draw(GRID_STATUS_OPENED);
 					return;
 				}
 				//是空格,计算所有与当前格临接的空格和数字
@@ -204,24 +205,19 @@ function grid(){
 					{
 						//取出起点
 						_current_point = _point_pool.pop();
-						_left_border = 0;
-						_right_border = sl_map_width - 1;
+						_left_border_x = 0;
+						_right_border_x = sl_map_width - 1;
 						//左右延伸到边界,找到left和right边界
 						//left
-						for (i = _current_point.x - 1;i >= 0;i-- )
+						for (i = _current_point.x;i >= 0;i-- )
 						{
 							_grid_type_tmp = getGridType(i, _current_point.y);
+							//console.log('left ' + _grid_type_tmp);
 							//空格,变为显示,继续循环
 							if (_grid_type_tmp == GRID_TYPE_EMPTY)
 							{
 								$("#" + _result.config.prefix + getPointStr(i, _current_point.y)).trigger('click', [true]);
 								continue;
-							}
-							//雷,不打开当前格,退出
-							if (_grid_type_tmp == GRID_TYPE_MINE)
-							{
-								_left_border_x = i + 1;
-								break;
 							}
 							//数字,变为显示,退出
 							if (_grid_type_tmp == GRID_TYPE_NUMBER)
@@ -230,22 +226,25 @@ function grid(){
 								_left_border_x = i;
 								break;
 							}
+							//雷,不打开当前格,退出
+							if (_grid_type_tmp == GRID_TYPE_MINE)
+							{
+								_left_border_x = i + 1;
+								break;
+							}
 						}
 						//right
 						for (i = _current_point.x + 1;i < sl_map_width;i++ )
 						{
 							_grid_type_tmp = getGridType(i, _current_point.y);
+							//console.log('right ' + getPointStr(i, _current_point.y) + ' type:' + _grid_type_tmp);
+							//console.log(sl_map_generator.mapData[_current_point.y][i]);
+
 							//空格,变为显示,继续循环
 							if (_grid_type_tmp == GRID_TYPE_EMPTY)
 							{
 								$("#" + _result.config.prefix + getPointStr(i, _current_point.y)).trigger('click', [true]);
 								continue;
-							}
-							//雷,不打开当前格,退出
-							if (_grid_type_tmp == GRID_TYPE_MINE)
-							{
-								_right_border_x = i - 1;
-								break;
 							}
 							//数字,变为显示,退出
 							if (_grid_type_tmp == GRID_TYPE_NUMBER)
@@ -254,31 +253,54 @@ function grid(){
 								_right_border_x = i;
 								break;
 							}
+							//雷,不打开当前格,退出
+							if (_grid_type_tmp == GRID_TYPE_MINE)
+							{
+								_right_border_x = i - 1;
+								break;
+							}
+
 						}
 						//扫描y-1和y+1,获取新的起点
 						addStartPoint(_current_point.y + 1);
 						addStartPoint(_current_point.y - 1);
+						//console.log(_point_pool);
+						if (_point_pool.length>3)
+						{
+							//return;
+						}
 						function addStartPoint(y)
 						{
-console.log(_left_border + ' to ' + _right_border + 'in line ' + y);
-							if (y > sl_map_height || y < 0)
+							//console.log(_left_border_x + ' to ' + _right_border_x + ' in line ' + y);
+							if (y >= sl_map_height || y < 0)
 							{
 								return;
 							}
 							//控制是否要将当前点加入起点池的flag
 							var _add_new_point = false;
 							var _grid_type_tmp;
-							for (i = _left_border;i <= _right_border ; i++)
+							for (i = _left_border_x;i <= _right_border_x ; i++)
 							{
-								_grid_type_tmp = getGridType(i, _current_point.y);
-								if (_grid_type_tmp == GRID_TYPE_EMPTY && isClickable(i, _current_point.y))
+								//如果是已打开过的格子,直接跳过
+								if (!isClickable(i, y))
+								{
+									continue;
+								}
+
+								_grid_type_tmp = getGridType(i, y);
+								if (_grid_type_tmp == GRID_TYPE_EMPTY)
 								{
 									_add_new_point = true;
 								}
 								else
 								{
+									if (_grid_type_tmp == GRID_TYPE_NUMBER)
+									{
+										$("#" + _result.config.prefix + getPointStr(i, y)).trigger('click', [true]);
+									}
 									if (_add_new_point == true)
 									{
+										//console.log({"x":i - 1, "y":y});
 										_point_pool.push({"x":i - 1, "y":y});
 										_add_new_point = false;
 									}
@@ -288,7 +310,9 @@ console.log(_left_border + ' to ' + _right_border + 'in line ' + y);
 							//添加边界点
 							if (_add_new_point == true)
 							{
-								_point_pool.push({"x":i - 1, "y":y});
+								//console.log('bian jie');
+								//console.log({"x":i - 1, "y":y});
+								_point_pool.push({"x":_right_border_x, "y":y});
 							}
 						}
 					}

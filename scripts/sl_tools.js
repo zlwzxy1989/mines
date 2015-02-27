@@ -24,8 +24,8 @@ function draw(type, point_x, point_y){
 }
 
 function getGridType(x, y){
-	var _grid_type = sl_map_generator.mapData[x][y].config.type;
-	if (_grid_type == GRID_TYPE_EMPTY && sl_map_generator.mapData[x][y].mines_around > 0)
+	var _grid_type = sl_map_generator.mapData[y][x].config.type;
+	if (_grid_type == GRID_TYPE_EMPTY && sl_map_generator.mapData[y][x].config.mines_around > 0)
 	{
 		return GRID_TYPE_NUMBER;
 	}
