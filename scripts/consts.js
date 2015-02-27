@@ -1,5 +1,5 @@
 var map_generator_default_config = {
-	"mine_num":20,
+	"mine_num":10,
 	"map_height":10,
 	"map_width":10,
 	"grid_width":12,
@@ -28,6 +28,7 @@ var grid_default_config = {
 
 var GRID_TYPE_EMPTY = 0;
 var GRID_TYPE_MINE = 1;
+var GRID_TYPE_NUMBER = 2;
 
 var GRID_STATUS_COVERD = 0;
 var GRID_STATUS_OPENED = 1;

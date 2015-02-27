@@ -63,27 +63,31 @@ function flagController(){
 		//用于计算周围的雷数
 		var m,n,_x_min,_x_max,_y_min,_y_max,_point_tmp,_mine_around_tmp;
 		var _status = status == undefined ? GRID_STATUS_COVERD : status;
-		for (i = 0;i < _result.config.map_width;i++)
+		for (j = 0;j < _result.config.map_height;j++)
 		{
 			_line = [];
-			for (j = 0;j < _result.config.map_height;j++)
+			for (i = 0;i < _result.config.map_width;i++)
 			{
 				_point = getPointStr(i, j);
 				_type = _result.mine_pool[_point] == undefined ? GRID_TYPE_EMPTY : GRID_TYPE_MINE;
-				//计算格子周围的雷数
-				_x_min = i - 1 < 0 ? 0 : i - 1;
-				_x_max = i + 1 >= _result.config.map_width ? i : i + 1;
-				_y_min = j - 1 < 0 ? 0 : j - 1;
-				_y_max = j + 1 >= _result.config.map_height ? j : j + 1;
 				_mines_around_tmp = 0;
-				for (m = _x_min;m <= _x_max ;m++ )
+				//计算格子周围的雷数
+				if (_type == GRID_TYPE_EMPTY)
 				{
-					for (n = _y_min;n <= _y_max ;n++ )
+					_x_min = i - 1 < 0 ? 0 : i - 1;
+					_x_max = i + 1 >= _result.config.map_width ? i : i + 1;
+					_y_min = j - 1 < 0 ? 0 : j - 1;
+					_y_max = j + 1 >= _result.config.map_height ? j : j + 1;
+
+					for (m = _x_min;m <= _x_max ;m++ )
 					{
-						_point_tmp = getPointStr(m, n);
-						if (_result.mine_pool[_point_tmp] != undefined)
+						for (n = _y_min;n <= _y_max ;n++ )
 						{
-							_mines_around_tmp++;
+							_point_tmp = getPointStr(m, n);
+							if (_result.mine_pool[_point_tmp] != undefined)
+							{
+								_mines_around_tmp++;
+							}
 						}
 					}
 				}
@@ -154,63 +158,171 @@ function grid(){
 		}
 		return 'img/' + _result.config.prefix + 'grid_' + _img_id + '.' + _result.config.img_type;
 	}
-	_result.getHtml = function(){
-		var _container = $("<" + _result.config.container + " style='width:" + _result.config.width + "px;height:" + _result.config.width + "px'></" + _result.config.container + ">");
-		var _img = $("<img id='" + _result.getImgId() + "' src='" + _result.getCurrentImageSrc() + "' />");
-		var _click_event = function(){
-			addMsgTo('click ' + _result.getImgId() + '...');
-			//未打开状态时,打开格子
-			if (isClickable(_result.config.x, _result.config.y))
-			{
-				setClicked(_result.config.x, _result.config.y);
-				$(this).unbind('.front');
+	var _click_event = function(e, check_around){
+		addMsgTo('click ' + _result.getImgId() + '...');
+		//未打开状态时,打开格子
+		if (!sl_game_over && isClickable(_result.config.x, _result.config.y))
+		{
+			setClicked(_result.config.x, _result.config.y);
+			$(this).unbind('.front');
 
-				_result.setConfigValue('status', GRID_STATUS_OPENED);
-				$(this).attr('src', _result.getCurrentImageSrc());
-				//是否踩雷
-				if (_result.isMine())
+			_result.setConfigValue('status', GRID_STATUS_OPENED);
+			$(this).attr('src', _result.getCurrentImageSrc());
+			//是否踩雷
+			if (_result.isMine())
+			{
+				sl_game_over = true;
+				draw(GRID_STATUS_OPENED, _result.config.x, _result.config.y);
+				setTimeout("alert('你SHI了!')", 100);
+				return;
+
+			} else {
+				sl_num_clicked++;
+				addMsgTo('clicked grid num:' + sl_num_clicked + ' | ' + sl_grid_num_all);
+				//判定是否胜利
+				if (sl_num_clicked + _result.config.mine_num >= sl_grid_num_all)
 				{
 					sl_game_over = true;
-					//_result.draw(GRID_STATUS_OPENED);
-					setTimeout("alert('你SHI了!')", 100);
+					draw(GRID_STATUS_OPENED);
+					setTimeout("alert('你赢了!')", 100);
 					return;
-
-				} else {
-					sl_num_clicked++;
-					addMsgTo('clicked grid num:' + sl_num_clicked + ' | ' + sl_grid_num_all);
-					//判定是否胜利
-					if (sl_num_clicked + _result.config.mine_num >= sl_grid_num_all)
+				}
+				//是空格,计算所有与当前格临接的空格和数字
+				if (_result.config.mines_around == 0 && check_around == undefined)
+				{
+					//尝试扫描线种子填充算法
+					var _start_point = {"x":_result.config.x, "y":_result.config.y};
+					var _current_point = {};
+					//算法的起点池
+					var _point_pool = [];
+					var _left_start,right_start;
+					var _left_border_x,_right_border_x;
+					var _grid_type_tmp;
+					var i;
+					_point_pool.push(_start_point);
+					while (_point_pool.length > 0)
 					{
-						sl_game_over = true;
-						//_result.draw(GRID_STATUS_OPENED);
-						setTimeout("alert('你赢了!')", 100);
-						return;
-					}
-
-					//是空格,则需要打开相邻的空格和数字
-					if (_result.config.mines_around == 0)
-					{
-						addMsgTo('click grids around');
-						var i,j;
-						for (i = _result.config.x - 1; i <= _result.config.x + 1; i++)
+						//取出起点
+						_current_point = _point_pool.pop();
+						_left_border = 0;
+						_right_border = sl_map_width - 1;
+						//左右延伸到边界,找到left和right边界
+						//left
+						for (i = _current_point.x - 1;i >= 0;i-- )
 						{
-							for (j = _result.config.y - 1; j <= _result.config.y + 1; j++)
+							_grid_type_tmp = getGridType(i, _current_point.y);
+							//空格,变为显示,继续循环
+							if (_grid_type_tmp == GRID_TYPE_EMPTY)
 							{
-								if (isClickable(i, j) && (i != _result.config.x || j != _result.config.y))
+								$("#" + _result.config.prefix + getPointStr(i, _current_point.y)).trigger('click', [true]);
+								continue;
+							}
+							//雷,不打开当前格,退出
+							if (_grid_type_tmp == GRID_TYPE_MINE)
+							{
+								_left_border_x = i + 1;
+								break;
+							}
+							//数字,变为显示,退出
+							if (_grid_type_tmp == GRID_TYPE_NUMBER)
+							{
+								$("#" + _result.config.prefix + getPointStr(i, _current_point.y)).trigger('click', [true]);
+								_left_border_x = i;
+								break;
+							}
+						}
+						//right
+						for (i = _current_point.x + 1;i < sl_map_width;i++ )
+						{
+							_grid_type_tmp = getGridType(i, _current_point.y);
+							//空格,变为显示,继续循环
+							if (_grid_type_tmp == GRID_TYPE_EMPTY)
+							{
+								$("#" + _result.config.prefix + getPointStr(i, _current_point.y)).trigger('click', [true]);
+								continue;
+							}
+							//雷,不打开当前格,退出
+							if (_grid_type_tmp == GRID_TYPE_MINE)
+							{
+								_right_border_x = i - 1;
+								break;
+							}
+							//数字,变为显示,退出
+							if (_grid_type_tmp == GRID_TYPE_NUMBER)
+							{
+								$("#" + _result.config.prefix + getPointStr(i, _current_point.y)).trigger('click', [true]);
+								_right_border_x = i;
+								break;
+							}
+						}
+						//扫描y-1和y+1,获取新的起点
+						addStartPoint(_current_point.y + 1);
+						addStartPoint(_current_point.y - 1);
+						function addStartPoint(y)
+						{
+console.log(_left_border + ' to ' + _right_border + 'in line ' + y);
+							if (y > sl_map_height || y < 0)
+							{
+								return;
+							}
+							//控制是否要将当前点加入起点池的flag
+							var _add_new_point = false;
+							var _grid_type_tmp;
+							for (i = _left_border;i <= _right_border ; i++)
+							{
+								_grid_type_tmp = getGridType(i, _current_point.y);
+								if (_grid_type_tmp == GRID_TYPE_EMPTY && isClickable(i, _current_point.y))
 								{
-									$("#" + _result.config.prefix + getPointStr(i, j)).click();
+									_add_new_point = true;
 								}
+								else
+								{
+									if (_add_new_point == true)
+									{
+										_point_pool.push({"x":i - 1, "y":y});
+										_add_new_point = false;
+									}
+								} 
+
+							}
+							//添加边界点
+							if (_add_new_point == true)
+							{
+								_point_pool.push({"x":i - 1, "y":y});
 							}
 						}
 					}
+					/*
+					addMsgTo('click grids around');
+					var _direction = [
+						{"x":-1,"y":0},
+						{"x":1,"y":0},
+						{"x":0,"y":-1},
+						{"x":0,"y":1}
+					];
+					var i, _x_tmp, _y_tmp;
+					for (i = 0; i <= _direction.length - 1; i++)
+					{
+						_x_tmp = _result.config.x + _direction[i].x;
+						_y_tmp = _result.config.y + _direction[i].y;
+						if (isClickable(_x_tmp, _y_tmp))
+						{
+							addMsgTo('click around:' + getPointStr(_x_tmp, _y_tmp));
+							$("#" + _result.config.prefix + getPointStr(_x_tmp, _y_tmp)).trigger('click', [true]);
+						}
+					}
+					*/
 				}
-				
 			}
+			
 		}
+	}
+	_result.getHtml = function(){
+		var _container = $("<" + _result.config.container + " style='width:" + _result.config.width + "px;height:" + _result.config.width + "px'></" + _result.config.container + ">");
+		var _img = $("<img id='" + _result.getImgId() + "' src='" + _result.getCurrentImageSrc() + "' />");
 		_img.bind('click.front', _click_event);
 		_container.append(_img);
 		return _container;
-
 	}
 	
 	return _result;

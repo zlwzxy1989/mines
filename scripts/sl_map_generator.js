@@ -11,7 +11,7 @@ function mapGenerator(){
 	}
 	
 	//0-重画,格子覆盖表示 1-格子正面表示
-	_result.draw = function(draw_type){
+	_result.draw = function(draw_type, point_x, point_y){
 		addMsgTo('draw...');
 		var _time_start = new Date().getTime();
 		var _draw_type = draw_type == undefined ? GRID_STATUS_COVERD : draw_type;
@@ -28,6 +28,14 @@ function mapGenerator(){
 		for (i = _result.mapData.length - 1;i >= 0;i--) {
 			for (j = 0;j < _result.mapData[i].length ;j++) {
 				$(_result.config.container).append(_result.mapData[i][j].getHtml());
+			}
+		}
+		//画打开状态时,标注命中点
+		if (_draw_type == GRID_STATUS_OPENED)
+		{
+			if (point_x != undefined && point_y != undefined)
+			{
+				$('#' + _result.config.grid_class_prefix + getPointStr(point_x, point_y)).parent().css('border-color', 'red');
 			}
 		}
 		var _time_end = new Date().getTime();
