@@ -7,7 +7,6 @@ var global_config = {
 	"grid_container":'div',
 	"grid_class_prefix":'sl_',
 	"prefix":'sl_',
-	"debug":0,
 	"img_type":'gif',
 	"grid_container":"div"
 };
