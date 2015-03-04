@@ -1,4 +1,8 @@
 $(document).ready(function(){
+	//屏蔽右键菜单
+    $(document).bind("contextmenu", function (e) {
+        return false;
+    });
 	$('#init').click(function(){
 		game_config = game_init(global_config);
 		drawMap(game_config);
