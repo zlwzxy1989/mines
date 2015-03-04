@@ -73,13 +73,7 @@ function getCoordinateByImgId(config, img_id){
 }
 function addEventToImg(config){
 	$(config.container + " img").each(function(){
-		$(this).click(
-		{"config":config}, _click_event
-			/*function(){
-			var _coordinate = getCoordinateByImgId(config, $(this).attr('id'));
-			console.log(_coordinate);
-			console.log(config.grid_data[_coordinate[1]][_coordinate[0]]);
-		}*/);
+		$(this).click({"config":config}, left_click_event);
 	});
 }
 function getGridType(config, x, y){
@@ -239,7 +233,7 @@ function openSingleGrid(config, x, y){
 function drawSingleGrid(config, x, y){
 	$('#' + getImgId(config, x, y)).attr('src', getCurrentImageSrc(config, x, y));
 }
-var _click_event = function(e){
+var left_click_event = function(e){
 	var config = e.data.config;
 	if (config.game_over)
 	{
@@ -277,137 +271,7 @@ var _click_event = function(e){
 			//是空格,计算所有与当前格临接的空格和数字
 			if (_gird_data_single.mines_around == 0)
 			{
-				//尝试扫描线种子填充算法
-				var _start_point = {"x":_gird_data_single.x, "y":_gird_data_single.y};
-				var _current_point = {};
-				//算法的起点池
-				var _point_pool = [];
-				var _left_start,right_start;
-				var _left_border_x,_right_border_x;
-				var _grid_type_tmp;
-				var i;
-				_point_pool.push(_start_point);
-				while (_point_pool.length > 0)
-				{
-					//取出起点
-					_current_point = _point_pool.pop();
-					openSingleGrid(config, _current_point.x, _current_point.y);
-					_left_border_x = 0;
-					_right_border_x = config.map_width - 1;
-					//左右延伸到边界,找到left和right边界
-					//left
-					for (i = _current_point.x - 1;i >= 0;i-- )
-					{
-						_grid_type_tmp = getGridType(config, i, _current_point.y);
-						//console.log('left ' + _grid_type_tmp);
-						//空格,变为显示,继续循环
-						if (_grid_type_tmp == GRID_TYPE_EMPTY)
-						{
-							openSingleGrid(config, i, _current_point.y);
-							continue;
-						}
-						//数字,变为显示,退出
-						if (_grid_type_tmp == GRID_TYPE_NUMBER)
-						{
-							openSingleGrid(config, i, _current_point.y);
-							_left_border_x = i + 1;
-							break;
-						}
-						//雷,不打开当前格,退出
-						if (_grid_type_tmp == GRID_TYPE_MINE)
-						{
-							_left_border_x = i + 1;
-							break;
-						}
-					}
-					//right
-					for (i = _current_point.x + 1;i < config.map_width;i++ )
-					{
-						_grid_type_tmp = getGridType(config, i, _current_point.y);
-						//console.log('right ' + getPointStr(i, _current_point.y) + ' type:' + _grid_type_tmp);
-						//console.log(sl_map_generator.mapData[_current_point.y][i]);
-
-						//空格,变为显示,继续循环
-						if (_grid_type_tmp == GRID_TYPE_EMPTY)
-						{
-							openSingleGrid(config, i, _current_point.y);
-							continue;
-						}
-						//数字,变为显示,退出
-						if (_grid_type_tmp == GRID_TYPE_NUMBER)
-						{
-							openSingleGrid(config, i, _current_point.y);
-							_right_border_x = i - 1;
-							break;
-						}
-						//雷,不打开当前格,退出
-						if (_grid_type_tmp == GRID_TYPE_MINE)
-						{
-							_right_border_x = i - 1;
-							break;
-						}
-
-					}
-					//扫描y-1和y+1,获取新的起点
-					addStartPoint(_current_point.y + 1);
-					addStartPoint(_current_point.y - 1);
-					//console.log(_point_pool);
-					function addStartPoint(y)
-					{
-						//console.log(_left_border_x + ' to ' + _right_border_x + ' in line ' + y);
-						if (y >= config.map_height || y < 0)
-						{
-							return;
-						}
-						//控制是否要将当前点加入起点池的flag
-						var _add_new_point = false;
-						var _grid_type_tmp;
-						//是否区域内的格子都打开过,如果都打开过就忽略此起点
-						var _all_opened = true;
-						for (i = _left_border_x;i <= _right_border_x ; i++)
-						{
-							//只要有一个格子未打开就需要处理
-							if (isClickable(config, i, y))
-							{
-								_all_opened = false;
-							}
-							_grid_type_tmp = getGridType(config, i, y);
-							if (_grid_type_tmp == GRID_TYPE_EMPTY)
-							{
-								_add_new_point = true;
-							}
-							else
-							{
-								if (_grid_type_tmp == GRID_TYPE_NUMBER)
-								{
-									openSingleGrid(config, i, y);
-								}
-								if (_add_new_point == true)
-								{
-									//console.log({"x":i - 1, "y":y});
-									if (_all_opened == false)
-									{
-										_point_pool.push({"x":i - 1, "y":y});
-										_all_opened = true;
-									}									
-									_add_new_point = false;
-								}
-							} 
-
-						}
-						//添加边界点
-						if (_add_new_point == true)
-						{
-							//console.log('bian jie');
-							//console.log({"x":i - 1, "y":y});
-							if (_all_opened == false)
-							{
-								_point_pool.push({"x":_right_border_x, "y":y});
-								_all_opened = true;
-							}
-						}
-					}
-				}
+				openGridsAround(config, _gird_data_single.x, _gird_data_single.y);
 				//判定是否胜利
 				if (isWin(config))
 				{
@@ -420,5 +284,141 @@ var _click_event = function(e){
 
 		}
 		
+	}
+}
+//打开周围的格子
+function openGridsAround(config, x, y){
+	var _result = [];
+	//尝试扫描线种子填充算法
+	var _start_point = {"x":x, "y":y};
+	var _current_point = {};
+	//算法的起点池
+	var _point_pool = [];
+	var _left_start,right_start;
+	var _left_border_x,_right_border_x;
+	var _grid_type_tmp;
+	var i;
+	_point_pool.push(_start_point);
+	while (_point_pool.length > 0)
+	{
+		//取出起点
+		_current_point = _point_pool.pop();
+		openSingleGrid(config, _current_point.x, _current_point.y);
+		_left_border_x = 0;
+		_right_border_x = config.map_width - 1;
+		//左右延伸到边界,找到left和right边界
+		//windows为8方向填充,左右边界各+1
+		//left
+		for (i = _current_point.x - 1;i >= 0;i-- )
+		{
+			_grid_type_tmp = getGridType(config, i, _current_point.y);
+			//console.log('left ' + _grid_type_tmp);
+			//空格,变为显示,继续循环
+			if (_grid_type_tmp == GRID_TYPE_EMPTY)
+			{
+				openSingleGrid(config, i, _current_point.y);
+				continue;
+			}
+			//数字,变为显示,退出
+			if (_grid_type_tmp == GRID_TYPE_NUMBER)
+			{
+				openSingleGrid(config, i, _current_point.y);
+				_left_border_x = i;
+				break;
+			}
+			//雷,不打开当前格,退出
+			if (_grid_type_tmp == GRID_TYPE_MINE)
+			{
+				_left_border_x = i;
+				break;
+			}
+		}
+		//right
+		for (i = _current_point.x + 1;i < config.map_width;i++ )
+		{
+			_grid_type_tmp = getGridType(config, i, _current_point.y);
+			//console.log('right ' + getPointStr(i, _current_point.y) + ' type:' + _grid_type_tmp);
+			//console.log(sl_map_generator.mapData[_current_point.y][i]);
+
+			//空格,变为显示,继续循环
+			if (_grid_type_tmp == GRID_TYPE_EMPTY)
+			{
+				openSingleGrid(config, i, _current_point.y);
+				continue;
+			}
+			//数字,变为显示,退出
+			if (_grid_type_tmp == GRID_TYPE_NUMBER)
+			{
+				openSingleGrid(config, i, _current_point.y);
+				_right_border_x = i;
+				break;
+			}
+			//雷,不打开当前格,退出
+			if (_grid_type_tmp == GRID_TYPE_MINE)
+			{
+				_right_border_x = i;
+				break;
+			}
+
+		}
+		//扫描y-1和y+1,获取新的起点
+		addStartPoint(_current_point.y + 1);
+		addStartPoint(_current_point.y - 1);
+		//console.log(_point_pool);
+		function addStartPoint(y)
+		{
+			//console.log(_left_border_x + ' to ' + _right_border_x + ' in line ' + y);
+			if (y >= config.map_height || y < 0)
+			{
+				return;
+			}
+			//控制是否要将当前点加入起点池的flag
+			var _add_new_point = false;
+			var _grid_type_tmp;
+			//是否区域内的格子都打开过,如果都打开过就忽略此起点
+			var _all_opened = true;
+			for (i = _left_border_x;i <= _right_border_x ; i++)
+			{
+				//只要有一个格子未打开就需要处理
+				if (isClickable(config, i, y))
+				{
+					_all_opened = false;
+				}
+				_grid_type_tmp = getGridType(config, i, y);
+				if (_grid_type_tmp == GRID_TYPE_EMPTY)
+				{
+					_add_new_point = true;
+				}
+				else
+				{
+					if (_grid_type_tmp == GRID_TYPE_NUMBER)
+					{
+						openSingleGrid(config, i, y);
+					}
+					if (_add_new_point == true)
+					{
+						//console.log({"x":i - 1, "y":y});
+						if (_all_opened == false)
+						{
+							_point_pool.push({"x":i - 1, "y":y});
+							_all_opened = true;
+						}									
+						_add_new_point = false;
+					}
+				} 
+
+			}
+			//添加边界点
+			if (_add_new_point == true)
+			{
+				//console.log('bian jie');
+				//console.log({"x":i - 1, "y":y});
+				if (_all_opened == false)
+				{
+					_point_pool.push({"x":_right_border_x, "y":y});
+					_all_opened = true;
+				}
+			}
+		}
 	}
 }
