@@ -171,6 +171,7 @@ var _data = [];
 		//用于计算周围的雷数
 		var m,n,_x_min,_x_max,_y_min,_y_max,_point_tmp,_mine_around_tmp;
 		//数组中保存形式为data[y坐标][x坐标]
+		var _debug_mines_around = '';
 		for (j = 0;j < config.map_height;j++)
 		{
 			_line = [];
@@ -179,7 +180,7 @@ var _data = [];
 				_point = getPointStr(i, j);
 				_type = $.inArray(_point, config.mine_pool) == -1 ? GRID_TYPE_EMPTY : GRID_TYPE_MINE;
 				_mines_around_tmp = _type == GRID_TYPE_EMPTY ? getMinesAround(config, i, j) : 0;
-				addMsgTo(' point '+ _point +': '+ _mines_around_tmp +' mines around');
+				_debug_mines_around += ' point '+ _point +': '+ _mines_around_tmp +' mines around';
 				_line.push({
 					"x":i,
 					"y":j,
@@ -191,6 +192,7 @@ var _data = [];
 			}
 			_data.push(_line);
 		}
+		addMsgTo(_debug_mines_around);
 		var _time_end = new Date().getTime();
 		addMsgTo('time spent:' + (_time_end - _time_start)/1000 + ' s');
 		addMsgTo('genGridData end...');
@@ -224,12 +226,15 @@ function isWin(config){
 }
 
 function openSingleGrid(config, x, y){
-	var _gird_data_single = config.grid_data[y][x];
-	_gird_data_single.clickable = false;
-	_gird_data_single.status = GRID_STATUS_OPENED;
-	drawSingleGrid(config, x, y);
-	config.num_clicked++;
-	addMsgTo('clicked grid num:' + config.num_clicked + ' | ' + config.grid_num_all);
+	if (isClickable(config, x, y))
+	{
+		var _gird_data_single = config.grid_data[y][x];
+		_gird_data_single.clickable = false;
+		_gird_data_single.status = GRID_STATUS_OPENED;
+		drawSingleGrid(config, x, y);
+		config.num_clicked++;
+		addMsgTo('clicked grid num:' + config.num_clicked + ' | ' + config.grid_num_all);
+	}
 }
 function drawSingleGrid(config, x, y){
 	$('#' + getImgId(config, x, y)).attr('src', getCurrentImageSrc(config, x, y));
@@ -286,25 +291,26 @@ var _click_event = function(e){
 				{
 					//取出起点
 					_current_point = _point_pool.pop();
+					openSingleGrid(config, _current_point.x, _current_point.y);
 					_left_border_x = 0;
 					_right_border_x = config.map_width - 1;
 					//左右延伸到边界,找到left和right边界
 					//left
-					for (i = _current_point.x;i >= 0;i-- )
+					for (i = _current_point.x - 1;i >= 0;i-- )
 					{
 						_grid_type_tmp = getGridType(config, i, _current_point.y);
 						//console.log('left ' + _grid_type_tmp);
 						//空格,变为显示,继续循环
-						if (_grid_type_tmp == GRID_TYPE_EMPTY && isClickable(config, i, _current_point.y))
+						if (_grid_type_tmp == GRID_TYPE_EMPTY)
 						{
 							openSingleGrid(config, i, _current_point.y);
 							continue;
 						}
 						//数字,变为显示,退出
-						if (_grid_type_tmp == GRID_TYPE_NUMBER && isClickable(config, i, _current_point.y))
+						if (_grid_type_tmp == GRID_TYPE_NUMBER)
 						{
 							openSingleGrid(config, i, _current_point.y);
-							_left_border_x = i;
+							_left_border_x = i + 1;
 							break;
 						}
 						//雷,不打开当前格,退出
@@ -322,16 +328,16 @@ var _click_event = function(e){
 						//console.log(sl_map_generator.mapData[_current_point.y][i]);
 
 						//空格,变为显示,继续循环
-						if (_grid_type_tmp == GRID_TYPE_EMPTY && isClickable(config, i, _current_point.y))
+						if (_grid_type_tmp == GRID_TYPE_EMPTY)
 						{
 							openSingleGrid(config, i, _current_point.y);
 							continue;
 						}
 						//数字,变为显示,退出
-						if (_grid_type_tmp == GRID_TYPE_NUMBER && isClickable(config, i, _current_point.y))
+						if (_grid_type_tmp == GRID_TYPE_NUMBER)
 						{
 							openSingleGrid(config, i, _current_point.y);
-							_right_border_x = i;
+							_right_border_x = i - 1;
 							break;
 						}
 						//雷,不打开当前格,退出
@@ -346,10 +352,6 @@ var _click_event = function(e){
 					addStartPoint(_current_point.y + 1);
 					addStartPoint(_current_point.y - 1);
 					//console.log(_point_pool);
-					if (_point_pool.length>3)
-					{
-						//return;
-					}
 					function addStartPoint(y)
 					{
 						//console.log(_left_border_x + ' to ' + _right_border_x + ' in line ' + y);
@@ -376,7 +378,7 @@ var _click_event = function(e){
 							}
 							else
 							{
-								if (_grid_type_tmp == GRID_TYPE_NUMBER && isClickable(config, i, y))
+								if (_grid_type_tmp == GRID_TYPE_NUMBER)
 								{
 									openSingleGrid(config, i, y);
 								}
