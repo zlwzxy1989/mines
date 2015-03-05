@@ -84,6 +84,7 @@ function addEventToImg(config){
 	$(config.container + " img").each(function(){
 		
 		$(this).bind('mousedown', {"config":config}, function(e){
+			e.preventDefault();
 			//mousedown只处理右键,左键在click里处理
 			if (e.which == 3)
 			{

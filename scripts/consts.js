@@ -22,6 +22,33 @@ var grid_default_config = {
 	"mines_around":0
 };
 
+var game_rank = [
+	{
+	"mine_num":9,
+	"map_height":9,
+	"map_width":10,
+	},
+	{
+	"mine_num":40,
+	"map_height":16,
+	"map_width":16,
+	},
+	{
+	"mine_num":99,
+	"map_height":16,
+	"map_width":30,
+	},
+	{
+	"mine_num":899,
+	"map_height":30,
+	"map_width":30,
+	},
+	{
+	"mine_num":10,
+	"map_height":10,
+	"map_width":10,
+	}
+];
 var GRID_TYPE_EMPTY = 0;
 var GRID_TYPE_MINE = 1;
 var GRID_TYPE_NUMBER = 2;
