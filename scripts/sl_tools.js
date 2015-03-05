@@ -32,24 +32,24 @@ function getGridHtml(config, x, y){
 	return _container;
 }
 function getCurrentImageSrc(config, x, y){
-		var _img_id = '';
-		var _status = config.grid_data[y][x].status;
-		var _type = config.grid_data[y][x].type;
-		var _mines_around = config.grid_data[y][x].mines_around;
-		if (_status == GRID_STATUS_OPENED)
+	var _img_id = '';
+	var _status = config.grid_data[y][x].status;
+	var _type = config.grid_data[y][x].type;
+	var _mines_around = config.grid_data[y][x].mines_around;
+	if (_status == GRID_STATUS_OPENED)
+	{
+		if (_type == GRID_TYPE_MINE)
 		{
-			if (_type == GRID_TYPE_MINE)
-			{
-				_img_id = String(_status) + '-' + String(_type);
-			} else if (_type == GRID_TYPE_EMPTY)
-			{
-				_img_id = String(_status) + '-' + String(_type) + '-' + String(_mines_around);
-			}			
-		} else {
-			_img_id = String(_status);
-		}
-		return 'img/' + config.prefix + 'grid_' + _img_id + '.' + config.img_type;
+			_img_id = String(_status) + '-' + String(_type);
+		} else if (_type == GRID_TYPE_EMPTY)
+		{
+			_img_id = String(_status) + '-' + String(_type) + '-' + String(_mines_around);
+		}			
+	} else {
+		_img_id = String(_status);
 	}
+	return 'img/' + config.prefix + 'grid_' + _img_id + '.' + config.img_type;
+}
 function setAllStatus(config, status){
 	var i,j;
 	var _status = status == undefined ? GRID_STATUS_OPENED : status;
@@ -90,6 +90,17 @@ function addEventToImg(config){
 			{
 				right_click_event(e, $(this).attr('id'));
 			}
+		});
+		$(this).bind('mouseover', {"config":config}, function(e){
+			var config = e.data.config;
+			var _coordinate = getCoordinateByImgId(config, $(this).attr('id'));
+			if (isClickable(config, _coordinate[0], _coordinate[1]))
+			{
+				$(this).css('opacity', 0.7);
+			}
+		});
+		$(this).bind('mouseout', function(e){
+			$(this).css('opacity', 1);
 		});
 		$(this).click({"config":config}, left_click_event);
 	});
@@ -141,7 +152,7 @@ function game_init(config){
 }
 
 //随机生成雷的坐标
-//算法可以改进,当雷比空白多时可以先填空白,剩下的就是雷
+//当雷比空白多时可以先填空白,剩下的就是雷
 function randomize(config){
 	addMsgTo('randomize...');
 	var _mine_pool = [];
@@ -323,7 +334,7 @@ var left_click_event = function(e){
 				{
 					config.game_over = true;
 					setTimeout("alert('你赢了!')", 100);
-					//draw(GRID_STATUS_OPENED);
+					clearTimer();
 					return;
 				}
 			}
