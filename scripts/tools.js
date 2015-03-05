@@ -158,3 +158,44 @@ function getArgs(obj_default) {
 	}
 	return parseInt(_min + Math.random() * _max, 10);
  }
+
+/*
+ * 秒数转成XX:XX:XX格式
+ *
+ * @param seconds int 
+ *
+ * @return str
+ * */
+function secondsToStr(seconds){
+	var _seconds_left = seconds == undefined ? 0 : seconds;
+	var _seconds_left;
+	if (isNaN(_seconds_left))
+	{
+		return false;
+	}
+	function addZero(str){
+		return str.length == 1 ? '0' + str : str;
+	}
+	//小时
+	var _hours = parseInt(_seconds_left / 3600, 10);
+	if (_hours >= 24)
+	{
+		return '23:59:59';
+	}
+	_seconds_left = _seconds_left % 3600;
+	_hours = addZero(_hours) + ':';
+	if (_hours.length == 2)
+	{
+		_hours = '0' + _hours;
+	}
+	//分
+	var _minutes = String(parseInt(_seconds_left / 60, 10));
+	_seconds_left = String(_seconds_left % 60);
+	_minutes = addZero(_minutes) + ':';
+	if (_minutes.length == 2)
+	{
+		_minutes = '0' + _minutes;
+	}
+	//秒为_seconds_left
+	return _hours + _minutes + addZero(_seconds_left);
+}

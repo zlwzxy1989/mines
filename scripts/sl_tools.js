@@ -157,17 +157,36 @@ function randomize(config){
 			_pool_pop.push(getPointStr(i, j));
 		}
 	}
-	var k = 0;
-	var _index, _point;
-	while (k < config.mine_num)
+	var k;
+	var _index, _point , _debug_info = '';
+	//雷比空地多时从空地开始剔除
+	if (config.mine_num * 2 > config.grid_num_all)
 	{
-		_index = getRandInt(0, _pool_pop.length - 1);
-		_point = _pool_pop[_index];
-		addMsgTo(' add mine ' + _point);
-		_mine_pool.push(_point);
-		_pool_pop.splice(_index, 1);
-		k++;
+		k = config.mine_num;
+		while (k < config.grid_num_all)
+		{
+			_index = getRandInt(0, _pool_pop.length - 1);
+			_point = _pool_pop[_index];
+			_debug_info += ' add empty gird ' + _point + "\r\n";
+			_pool_pop.splice(_index, 1);
+			k++;			
+		}
+		_mine_pool = _pool_pop;
 	}
+	else
+	{
+		k = 0;
+		while (k < config.mine_num)
+		{
+			_index = getRandInt(0, _pool_pop.length - 1);
+			_point = _pool_pop[_index];
+			_debug_info += ' add mine ' + _point + "\r\n";
+			_mine_pool.push(_point);
+			_pool_pop.splice(_index, 1);
+			k++;
+		}
+	}
+	addMsgTo(_debug_info);
 	var _time_end = new Date().getTime();
 	addMsgTo('time spent:' + (_time_end - _time_start)/1000 + ' s');
 	addMsgTo('randomize end...');
@@ -200,7 +219,7 @@ var _data = [];
 				_point = getPointStr(i, j);
 				_type = $.inArray(_point, config.mine_pool) == -1 ? GRID_TYPE_EMPTY : GRID_TYPE_MINE;
 				_mines_around_tmp = _type == GRID_TYPE_EMPTY ? getMinesAround(config, i, j) : 0;
-				_debug_mines_around += ' point '+ _point +': '+ _mines_around_tmp +' mines around';
+				_debug_mines_around += ' point '+ _point +': '+ _mines_around_tmp +' mines around' + "\r\n";
 				_line.push({
 					"x":i,
 					"y":j,
@@ -279,10 +298,10 @@ var left_click_event = function(e){
 		{
 			config.game_over = true;
 			setTimeout("alert('你SHI了!')", 100);
+			clearTimer();
 			setAllStatus(config);
 			drawMap(config);
 			selectLastClick(config, _coordinate[0], _coordinate[1]);
-			//draw(GRID_STATUS_OPENED, _result.config.x, _result.config.y);
 
 		} 
 		else
@@ -292,7 +311,7 @@ var left_click_event = function(e){
 			{
 				config.game_over = true;
 				setTimeout("alert('你赢了!')", 100);
-				//draw(GRID_STATUS_OPENED);
+				clearTimer();
 				return;
 			}
 			//是空格,计算所有与当前格临接的空格和数字
@@ -474,4 +493,18 @@ function isGameOver(config){
 		return true;
 	}
 	return false;
+}
+
+function startTimer(){
+		var _start_time = 0;
+		$('#timer').html(secondsToStr(_start_time));
+		var _start_timer = function(){
+			_start_time++;
+			$('#timer').html(secondsToStr(_start_time));
+			timer = setTimeout(_start_timer, 1000);
+		}
+		setTimeout(_start_timer, 1000);
+}
+function clearTimer(){
+	clearTimeout(timer);
 }

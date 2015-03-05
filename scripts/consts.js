@@ -24,9 +24,9 @@ var grid_default_config = {
 
 var game_rank = [
 	{
-	"mine_num":9,
+	"mine_num":10,
 	"map_height":9,
-	"map_width":10,
+	"map_width":9,
 	},
 	{
 	"mine_num":40,

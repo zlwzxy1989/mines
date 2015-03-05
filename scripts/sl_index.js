@@ -7,6 +7,7 @@ $(document).ready(function(){
 		game_config = game_init(global_config);
 		drawMap(game_config);
 		addEventToImg(game_config);
+		startTimer();
 	});
 	$('#rank').change(function(e){
 		var _rank = parseInt($(this).val(), 10);
@@ -15,7 +16,10 @@ $(document).ready(function(){
 		$('#map_height').val(game_rank[_rank].map_height);
 		$('#map_width').val(game_rank[_rank].map_width);
 	});
+	$('#timer').html(secondsToStr(0));
+
 	$('#grid_width').val(global_config.grid_width);
+
 	$('#rank').val(0);
 	$('#rank').trigger('change');
 });
