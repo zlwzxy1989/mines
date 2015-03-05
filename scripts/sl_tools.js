@@ -14,6 +14,11 @@ function getPointStr(x, y)
 
 function isClickable(config, x, y)
 {
+	//标旗时不能点
+	if (getGridStatus(config, x, y) == GRID_STATUS_FLAG)
+	{
+		return false;
+	}
 	return config.grid_data[y][x].clickable;
 }
 
@@ -45,7 +50,15 @@ function getCurrentImageSrc(config, x, y){
 		}
 		return 'img/' + config.prefix + 'grid_' + _img_id + '.' + config.img_type;
 	}
-
+function setAllStatus(config, status){
+	var i,j;
+	var _status = status == undefined ? GRID_STATUS_OPENED : status;
+	for (i = 0;i < config.map_height ;i++) {
+		for (j = 0;j < config.map_width ;j++) {
+			config.grid_data[i][j].status = _status;
+		}
+	}
+}
 function drawMap(config){
 	addMsgTo('draw...');
 	var _time_start = new Date().getTime();
@@ -256,7 +269,7 @@ var left_click_event = function(e){
 	addMsgTo('left click ' + _coordinate + '...');
 
 	//未打开状态时,打开格子
-	if (_gird_data_single.clickable)
+	if (isClickable(config, _coordinate[0], _coordinate[1]))
 	{
 		openSingleGrid(config, _coordinate[0], _coordinate[1]);
 		selectLastClick(config, _coordinate[0], _coordinate[1]);
@@ -265,8 +278,10 @@ var left_click_event = function(e){
 		{
 			config.game_over = true;
 			setTimeout("alert('你SHI了!')", 100);
+			setAllStatus(config);
+			drawMap(config);
+			selectLastClick(config, _coordinate[0], _coordinate[1]);
 			//draw(GRID_STATUS_OPENED, _result.config.x, _result.config.y);
-			return;
 
 		} 
 		else
@@ -293,8 +308,7 @@ var left_click_event = function(e){
 				}
 			}
 
-		}
-		
+		}		
 	}
 }
 function right_click_event(e, img_id){
@@ -388,10 +402,7 @@ function openGridsAround(config, x, y){
 			}
 
 		}
-		//扫描y-1和y+1,获取新的起点
-		addStartPoint(_current_point.y + 1);
-		addStartPoint(_current_point.y - 1);
-		//console.log(_point_pool);
+
 		function addStartPoint(y)
 		{
 			//console.log(_left_border_x + ' to ' + _right_border_x + ' in line ' + y);
@@ -447,6 +458,11 @@ function openGridsAround(config, x, y){
 				}
 			}
 		}
+		//扫描y-1和y+1,获取新的起点
+		addStartPoint(_current_point.y + 1);
+		addStartPoint(_current_point.y - 1);
+		//console.log(_point_pool);
+
 	}
 }
 
