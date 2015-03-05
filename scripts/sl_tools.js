@@ -17,10 +17,6 @@ function isClickable(config, x, y)
 	return config.grid_data[y][x].clickable;
 }
 
-function setClicked(x, y)
-{
-	sl_clicked_flag[getPointStr(x, y)] = false;
-}
 function getImgId(config, x, y){
 	return config.prefix + getPointStr(x, y);
 }
@@ -73,19 +69,35 @@ function getCoordinateByImgId(config, img_id){
 }
 function addEventToImg(config){
 	$(config.container + " img").each(function(){
+		
+		$(this).bind('mousedown', {"config":config}, function(e){
+			//mousedown只处理右键,左键在click里处理
+			if (e.which == 3)
+			{
+				right_click_event(e, $(this).attr('id'));
+			}
+		});
 		$(this).click({"config":config}, left_click_event);
 	});
 }
 function getGridType(config, x, y){
 	//console.log('getGridType in ' + y + '-' + x + ':');
+	//标记为雷时当雷处理
+	if (getGridStatus(config, x, y) == GRID_STATUS_FLAG)
+	{
+		return GRID_TYPE_MINE;
+	}
 	var _grid_type = config.grid_data[y][x].type;
+
 	if (_grid_type == GRID_TYPE_EMPTY && config.grid_data[y][x].mines_around > 0)
 	{
 		return GRID_TYPE_NUMBER;
 	}
 	return _grid_type;
 }
-
+function getGridStatus(config, x, y){
+	return config.grid_data[y][x].status;
+}
 function game_init(config){
 	$("#debug").val('');
 	var _result = getValuesFromObj(config, global_config);
@@ -235,14 +247,13 @@ function drawSingleGrid(config, x, y){
 }
 var left_click_event = function(e){
 	var config = e.data.config;
-	if (config.game_over)
+	if (isGameOver(config))
 	{
-		setTimeout("alert('游戏已经结束,请重新开局!')", 100);
 		return;
 	}
 	var _coordinate = getCoordinateByImgId(config, $(this).attr('id'));
 	var _gird_data_single = config.grid_data[_coordinate[1]][_coordinate[0]];
-	addMsgTo('click ' + _coordinate + '...');
+	addMsgTo('left click ' + _coordinate + '...');
 
 	//未打开状态时,打开格子
 	if (_gird_data_single.clickable)
@@ -285,6 +296,22 @@ var left_click_event = function(e){
 		}
 		
 	}
+}
+function right_click_event(e, img_id){
+	var config = e.data.config;
+	if (isGameOver(config))
+	{
+		return;
+	}
+	var _coordinate = getCoordinateByImgId(config, img_id);
+	var _gird_data_single = config.grid_data[_coordinate[1]][_coordinate[0]];
+	addMsgTo('right click ' + _coordinate + '...');
+	if (_gird_data_single.status != GRID_STATUS_OPENED)
+	{
+		_gird_data_single.status = _gird_data_single.status % 3 + 1;
+		drawSingleGrid(config, _coordinate[0], _coordinate[1]);
+	}
+
 }
 //打开周围的格子
 function openGridsAround(config, x, y){
@@ -421,4 +448,13 @@ function openGridsAround(config, x, y){
 			}
 		}
 	}
+}
+
+function isGameOver(config){
+	if (config.game_over)
+	{
+		setTimeout("alert('游戏已经结束,请重新开局!')", 100);
+		return true;
+	}
+	return false;
 }

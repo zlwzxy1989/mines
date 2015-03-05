@@ -1,4 +1,5 @@
 $(document).ready(function(){
+	/**/
 	//屏蔽右键菜单
     $(document).bind("contextmenu", function (e) {
         return false;
@@ -15,4 +16,5 @@ $(document).ready(function(){
 		$('#grid_width').val(global_config.grid_width);
 	});
 	$('#reset').click();
+
 });
