@@ -15,7 +15,7 @@ body{
 	float:left;
 	margin:10px 0;
 	padding:10px;
-	height:313px;
+	height:263px;
 }
 
 .sl_left_title{
@@ -30,8 +30,8 @@ body{
 	float:left;
 	margin:10px;
 	margin-left:0;
-	height:335px;
-	line-height:335px;
+	height:285px;
+	line-height:285px;
 	width:10px;
 	background-color:#EEEEEE;
 	cursor:pointer;
