@@ -540,7 +540,7 @@ function startTimer(){
 			$('#timer').html(secondsToStr(_start_time));
 			timer = setTimeout(_start_timer, 1000);
 		}
-		setTimeout(_start_timer, 1000);
+		timer = setTimeout(_start_timer, 1000);
 }
 function clearTimer(){
 	clearTimeout(timer);
