@@ -46,6 +46,7 @@ $(document).ready(function(){
 		drawSingleGrid(game_config, _x, _y);
 	}
 	$('#rank').val(0);
+	$('#rank').trigger('change');
 	$('#mines_left').html(0);
 
 	//切换设置的隐藏/显示
