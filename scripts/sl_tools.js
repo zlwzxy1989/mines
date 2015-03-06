@@ -59,6 +59,7 @@ function setAllStatus(config, status){
 		}
 	}
 }
+//游戏失败后重画可以不重新生成,用drawSingleGrid
 function drawMap(config){
 	addMsgTo('draw...');
 	var _time_start = new Date().getTime();
@@ -85,12 +86,21 @@ function addEventToImg(config){
 		
 		$(this).bind('mousedown', {"config":config}, function(e){
 			e.preventDefault();
-			//mousedown只处理右键,左键在click里处理
-			if (e.which == 3)
+			if (!isGameOver(e.data.config))
 			{
-				right_click_event(e, $(this).attr('id'));
+				if (e.which == 1)
+				{
+					changeFace(FACE_CLICK_DOWN);
+				}
+						
+				//mousedown只处理右键,左键在click里处理
+				if (e.which == 3)
+				{
+					right_click_event(e, $(this).attr('id'));
+				}
 			}
 		});
+
 		$(this).bind('mouseover', {"config":config}, function(e){
 			var config = e.data.config;
 			var _coordinate = getCoordinateByImgId(config, $(this).attr('id'));
@@ -99,10 +109,16 @@ function addEventToImg(config){
 				$(this).css('opacity', 0.7);
 			}
 		});
+
 		$(this).bind('mouseout', function(e){
 			$(this).css('opacity', 1);
 		});
-		$(this).click({"config":config}, left_click_event);
+		$(this).click({"config":config}, function(e){
+			if (!isGameOver(e.data.config))
+			{
+				left_click_event(e, $(this).attr('id'));
+			}
+		});
 	});
 }
 function getGridType(config, x, y){
@@ -146,7 +162,9 @@ function game_init(config){
 
 	$(_result.container).css('width', _result.container_width);
 	$(_result.container).css('height', _result.container_height);
-
+	
+	//剩余雷数
+	$('#mines_left').html(_result.mine_num);
 	
 	return _result;
 }
@@ -289,13 +307,9 @@ function openSingleGrid(config, x, y){
 function drawSingleGrid(config, x, y){
 	$('#' + getImgId(config, x, y)).attr('src', getCurrentImageSrc(config, x, y));
 }
-var left_click_event = function(e){
+var left_click_event = function(e, img_id){
 	var config = e.data.config;
-	if (isGameOver(config))
-	{
-		return;
-	}
-	var _coordinate = getCoordinateByImgId(config, $(this).attr('id'));
+	var _coordinate = getCoordinateByImgId(config, img_id);
 	var _gird_data_single = config.grid_data[_coordinate[1]][_coordinate[0]];
 	addMsgTo('left click ' + _coordinate + '...');
 
@@ -308,12 +322,13 @@ var left_click_event = function(e){
 		if (_gird_data_single.type == GRID_TYPE_MINE)
 		{
 			config.game_over = true;
+			changeFace(FACE_FAILED);
 			setTimeout("alert('你SHI了!')", 100);
 			clearTimer();
 			setAllStatus(config);
 			drawMap(config);
 			selectLastClick(config, _coordinate[0], _coordinate[1]);
-
+			return;
 		} 
 		else
 		{
@@ -321,6 +336,7 @@ var left_click_event = function(e){
 			if (isWin(config))
 			{
 				config.game_over = true;
+				changeFace(FACE_SUCCESS);
 				setTimeout("alert('你赢了!')", 100);
 				clearTimer();
 				return;
@@ -333,14 +349,15 @@ var left_click_event = function(e){
 				if (isWin(config))
 				{
 					config.game_over = true;
+					changeFace(FACE_SUCCESS);
 					setTimeout("alert('你赢了!')", 100);
 					clearTimer();
 					return;
 				}
 			}
-
 		}		
 	}
+	changeFace(FACE_NORMAL);
 }
 function right_click_event(e, img_id){
 	var config = e.data.config;
@@ -353,7 +370,17 @@ function right_click_event(e, img_id){
 	addMsgTo('right click ' + _coordinate + '...');
 	if (_gird_data_single.status != GRID_STATUS_OPENED)
 	{
+		//减少旗时剩余雷数增加
+		if (_gird_data_single.status == GRID_STATUS_FLAG)
+		{
+			addMinesDisplay(config);
+		}
 		_gird_data_single.status = _gird_data_single.status % 3 + 1;
+		//增加旗时剩余雷数减少
+		if (_gird_data_single.status == GRID_STATUS_FLAG)
+		{
+			minusMinesDisplay(config);
+		}
 		drawSingleGrid(config, _coordinate[0], _coordinate[1]);
 	}
 
@@ -500,7 +527,6 @@ function openGridsAround(config, x, y){
 function isGameOver(config){
 	if (config.game_over)
 	{
-		setTimeout("alert('游戏已经结束,请重新开局!')", 100);
 		return true;
 	}
 	return false;
@@ -518,4 +544,23 @@ function startTimer(){
 }
 function clearTimer(){
 	clearTimeout(timer);
+}
+
+function getMinesDisplay(config){
+	return parseInt($(config.mines_left_container).html(),10);
+}
+function setMinesDisplay(config, value){
+	$(config.mines_left_container).html(value);
+}
+function addMinesDisplay(config){
+	var _current_mines = getMinesDisplay(config);
+	setMinesDisplay(config, ++_current_mines);
+}
+function minusMinesDisplay(config){
+	var _current_mines = getMinesDisplay(config);
+	setMinesDisplay(config, --_current_mines);
+
+}
+function changeFace(id){
+	$('#face').attr('src', 'img/face_' + String(id) + '.jpg');
 }

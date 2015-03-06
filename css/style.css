@@ -1,3 +1,6 @@
+body{
+	margin:0;
+}
 .div {
 	margin:0;
 	padding:0;
@@ -8,11 +11,11 @@
 }
 
 .sl_left{
-	max-width:20%;
 	border:#CCCCCC solid 1px;
 	float:left;
-	margin:10px;
+	margin:10px 0;
 	padding:10px;
+	height:313px;
 }
 
 .sl_left_title{
@@ -23,15 +26,58 @@
 	margin:10px 0;
 }
 
+.sl_middle{
+	float:left;
+	margin:10px;
+	margin-left:0;
+	height:335px;
+	line-height:335px;
+	width:10px;
+	background-color:#EEEEEE;
+	cursor:pointer;
+}
+
 .sl_right{
 	float:left;
 	border:#CCCCCC solid 1px;
 	margin:10px;
 	padding:10px;
 }
-
+.sl_right_title {
+	border:#CCCCCC solid 1px;
+	float:left;
+	text-align:center;
+	width:100%;
+	padding:5px 0;
+}
+.sl_right_title .left{
+	float:left;
+	text-align:left;
+	width:30%;
+	vertical-align:top;
+	min-width:105px;
+}
+.sl_right_title .middle{
+	text-align:center; 
+	overflow:hidden;
+	min-width:50px;
+}
+.sl_right_title .right{
+	float:right;
+	text-align:right;
+	width:30%;
+	vertical-align:top;
+	min-width:105px;
+}
+.sl_right_title img{
+	cursor:pointer;
+	vertical-align:top;
+}
 .sl_right_mine {
 	border:#000 solid 1px;
+	margin-top:10px;
+	margin-left:auto;
+	margin-right:auto;
 }
 #mine_area div {
 	float:left;
