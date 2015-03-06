@@ -577,3 +577,47 @@ function minusMinesDisplay(config){
 function changeFace(id){
 	$('#face').attr('src', 'img/face_' + String(id) + '.jpg');
 }
+
+function check_param(){
+	if (IsNumber($("#map_height").val()) == false) {
+		$("#err_msg").html("地图高必须输入正整数");
+		$("#map_height").select();
+		return false;
+	}
+	if (IsNumber($("#map_width").val()) == false) {
+		$("#err_msg").html("地图宽必须输入正整数");
+		$("#map_width").select();
+		return false;
+	}
+	if (IsNumber($("#mine_num").val()) == false) {
+		$("#err_msg").html("雷数必须输入正整数");
+		$("#mine_num").select();
+		return false;
+	}
+	var _map_height = parseInt($("#map_height").val(), 10);
+	var _map_width = parseInt($("#map_width").val(), 10);
+	var _mine_num = parseInt($("#mine_num").val(), 10);
+
+	if (_map_height <= 8) {
+		$("#err_msg").html("比初级还小怎么行");
+		$("#map_height").select(); 
+		return false;
+	}
+	if (_map_width <= 8) {
+		$("#err_msg").html("比初级还小怎么行");
+		$("#map_width").select();
+		return false;
+	}
+	if (_mine_num > _map_height * _map_width) {
+		$("#err_msg").html("雷数不能超过格子总数");
+		$("#mine_num").select(); 
+		return false;
+	}
+	if (_map_height * _map_width > 1000) {
+		$("#err_msg").html("地图太大小心机器爆掉");
+		$("#map_height").select(); 
+		return false;
+	}
+	$("#err_msg").html('');
+	return true;
+}

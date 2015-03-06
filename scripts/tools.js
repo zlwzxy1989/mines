@@ -199,3 +199,16 @@ function secondsToStr(seconds){
 	//秒为_seconds_left
 	return _hours + _minutes + addZero(_seconds_left);
 }
+
+/*
+ * 检查是否是正整数
+ *
+ * @param str string
+ *
+ * @return str
+ * */
+
+function IsNumber(str) {
+    var _number = /^([1-9]\d*)$/;
+    return _number.test(str);
+}

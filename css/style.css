@@ -15,7 +15,7 @@ body{
 	float:left;
 	margin:10px 0;
 	padding:10px;
-	height:263px;
+	height:283px;
 }
 
 .sl_left_title{
@@ -25,12 +25,14 @@ body{
 .sl_left_action{
 	margin:10px 0;
 }
-
+#err_msg{
+	color:red;
+}
 .sl_middle{
 	float:left;
 	margin:10px;
 	margin-left:0;
-	height:285px;
+	height:305px;
 	line-height:285px;
 	width:10px;
 	background-color:#EEEEEE;

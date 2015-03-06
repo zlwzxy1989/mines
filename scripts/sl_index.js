@@ -9,6 +9,10 @@ $(document).ready(function(){
     });
 	$('#init,#face').click(function(){
 		changeFace(0);
+		if (!check_param())
+		{
+			return false;
+		}
 		game_config = game_init(global_config);
 		drawMap(game_config);
 		addEventToImg(game_config);
