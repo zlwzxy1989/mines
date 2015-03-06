@@ -41,7 +41,8 @@ function getCurrentImageSrc(config, x, y){
 		if (_type == GRID_TYPE_MINE)
 		{
 			_img_id = String(_status) + '-' + String(_type);
-		} else if (_type == GRID_TYPE_EMPTY)
+		} 
+		else if (_type == GRID_TYPE_EMPTY)
 		{
 			_img_id = String(_status) + '-' + String(_type) + '-' + String(_mines_around);
 		}			
@@ -50,12 +51,24 @@ function getCurrentImageSrc(config, x, y){
 	}
 	return 'img/' + config.prefix + 'grid_' + _img_id + '.' + config.img_type;
 }
-function setAllStatus(config, status){
+//用于SHI后开图,默认不改变flag的status
+function setGridToOpen(config){
 	var i,j;
-	var _status = status == undefined ? GRID_STATUS_OPENED : status;
 	for (i = 0;i < config.map_height ;i++) {
 		for (j = 0;j < config.map_width ;j++) {
-			config.grid_data[i][j].status = _status;
+			//如果是旗,判断旗是否标对
+			if (config.grid_data[i][j].status == GRID_STATUS_FLAG)
+			{
+				if (config.grid_data[i][j].type != GRID_TYPE_MINE)
+				{
+					config.grid_data[i][j].status = GRID_STATUS_WRONG_FLAG;
+				}
+			} 
+			else 
+			{
+				config.grid_data[i][j].status = GRID_STATUS_OPENED;
+			}
+
 		}
 	}
 }
@@ -325,7 +338,7 @@ var left_click_event = function(e, img_id){
 			changeFace(FACE_FAILED);
 			setTimeout("alert('你SHI了!')", 100);
 			clearTimer();
-			setAllStatus(config);
+			setGridToOpen(config);
 			drawMap(config);
 			selectLastClick(config, _coordinate[0], _coordinate[1]);
 			return;
