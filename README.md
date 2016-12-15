@@ -1,0 +1,2 @@
+# mines
+minesweeper for web
